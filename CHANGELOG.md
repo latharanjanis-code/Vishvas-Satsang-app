@@ -12,6 +12,10 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 - **Effect on the spec's worked example:** Meena now backs up rows 1–5 and Ravi rows 6–10 (previously each skipped their own row and swapped it).
 - **Files:** `lib/allocation.ts`, `tests/allocation.test.ts`, `Satsang-Portal-Spec.md` (rule 8, worked example, decisions log), `design.md` §5.2.
 
+### Saved in git
+- **Requested:** publish in git and online.
+- **Changed:** git repository created on this computer; first version saved (commit `b6c4973`). `.env` (passwords) and AI-tool reference folders are excluded.
+
 ### Test week reopened for voting (local demo only)
 - **Requested:** show the page where bhaktas vote.
 - **Changed:** the local test week (Sat 7 Nov) was put back to "voting open" so the form shows; its test allocation was cleared, votes kept. Added `scripts/reopen-voting.ts` (dev helper). No app code changed.
