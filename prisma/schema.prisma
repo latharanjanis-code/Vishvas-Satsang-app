@@ -1,0 +1,217 @@
+// Satsang Portal database schema. See design.md §3.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SatsangStatus {
+  SCHEDULED
+  OPEN
+  CLOSED
+  ALLOCATED
+  PUBLISHED
+  COMPLETED
+}
+
+enum Choice {
+  AVAILABLE
+  NOT_AVAILABLE
+  BACKUP
+}
+
+enum RowKind {
+  BLOCK
+  NAMED_PART
+  SINGLE_PRAYER
+  PREFILLED
+}
+
+enum RowStatus {
+  ASSIGNED
+  DROPPED
+  COVERED
+}
+
+enum Actor {
+  ADMIN
+  SCHEDULER
+  BHAKTA
+}
+
+model AdminAccount {
+  id                 Int       @id @default(1)
+  username           String    @unique
+  passwordHash       String
+  failedAttempts     Int       @default(0)
+  lockedUntil        DateTime?
+  mustChangePassword Boolean   @default(true)
+  updatedAt          DateTime  @updatedAt
+}
+
+model AdminSession {
+  id         String   @id // sha256 of the cookie token
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+}
+
+model Batch {
+  id         Int             @id @default(autoincrement())
+  name       String
+  active     Boolean         @default(true)
+  fixedNames String[]        @default(["VISVAS"]) // names that stay pre-filled in templates
+  bhaktas    Bhakta[]
+  satsangs   Satsang[]
+  schedule   WeeklySchedule?
+}
+
+model Bhakta {
+  id        Int        @id @default(autoincrement())
+  batchId   Int
+  name      String
+  nameKey   String
+  listOrder Int
+  active    Boolean    @default(true)
+  batch     Batch      @relation(fields: [batchId], references: [id])
+  responses Response[]
+
+  @@unique([batchId, nameKey])
+  @@index([batchId, listOrder])
+}
+
+model WeeklySchedule {
+  id                Int             @id @default(autoincrement())
+  batchId           Int             @unique
+  timezone          String          @default("Asia/Kolkata")
+  satsangDay        Int             @default(6) // 0 = Sunday … 6 = Saturday
+  satsangTime       String          @default("19:00")
+  openDay           Int             @default(1)
+  openTime          String          @default("06:00")
+  closeDay          Int             @default(2)
+  closeTime         String          @default("23:59")
+  publishDay        Int             @default(3)
+  publishTime       String          @default("06:00")
+  defaultTemplateId Int?
+  autoMode          Boolean         @default(false)
+  batch             Batch           @relation(fields: [batchId], references: [id])
+  defaultTemplate   SlokamTemplate? @relation(fields: [defaultTemplateId], references: [id], onDelete: SetNull)
+}
+
+model SlokamTemplate {
+  id               Int              @id @default(autoincrement())
+  name             String
+  slokamsPerBhakta Int
+  sourceFile       String // original file + sheet name, for reference only
+  createdAt        DateTime         @default(now())
+  rows             TemplateRow[]
+  satsangs         Satsang[]
+  defaultFor       WeeklySchedule[]
+}
+
+model TemplateRow {
+  id            Int            @id @default(autoincrement())
+  templateId    Int
+  sheetOrder    Int // 1, 2, 3… line order in the template
+  section       String
+  fromText      String?
+  toText        String?
+  rowKind       RowKind
+  unitNo        Int // lines sharing one "Allocated to" cell
+  rowSpan       Int            @default(1) // physical sheet rows this line takes up
+  prefilledName String?
+  template      SlokamTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, sheetOrder])
+}
+
+model Satsang {
+  id            Int               @id @default(autoincrement())
+  batchId       Int
+  seq           Int
+  title         String            @default("Satsang")
+  startsAt      DateTime
+  opensAt       DateTime
+  closesAt      DateTime
+  publishAt     DateTime
+  templateId    Int?
+  stateOverride String? // "open" | "closed" | null
+  status        SatsangStatus     @default(SCHEDULED)
+  publishPaused Boolean           @default(false)
+  holdReason    String? // why auto-publish is held (v2)
+  publishedAt   DateTime?
+  updatedAt     DateTime          @updatedAt
+  batch         Batch             @relation(fields: [batchId], references: [id])
+  template      SlokamTemplate?   @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  responses     Response[]
+  rejected      RejectedAttempt[]
+  rows          AllocationRow[]
+
+  @@unique([batchId, seq])
+  @@unique([batchId, startsAt])
+}
+
+model Response {
+  id          Int      @id @default(autoincrement())
+  satsangId   Int
+  bhaktaId    Int
+  choice      Choice
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  satsang     Satsang  @relation(fields: [satsangId], references: [id], onDelete: Cascade)
+  bhakta      Bhakta   @relation(fields: [bhaktaId], references: [id])
+
+  @@unique([satsangId, bhaktaId])
+}
+
+model RejectedAttempt {
+  id          Int      @id @default(autoincrement())
+  satsangId   Int
+  enteredName String
+  attemptedAt DateTime @default(now())
+  satsang     Satsang  @relation(fields: [satsangId], references: [id], onDelete: Cascade)
+}
+
+model AllocationRow {
+  id              Int       @id @default(autoincrement())
+  satsangId       Int
+  sheetOrder      Int
+  section         String
+  fromText        String?
+  toText          String?
+  rowKind         RowKind
+  unitNo          Int
+  rowSpan         Int       @default(1)
+  prefilledName   String?
+  backupGroup     Int?
+  primaryBhaktaId Int?
+  backupBhaktaId  Int?
+  coveredById     Int?
+  status          RowStatus @default(ASSIGNED)
+  satsang         Satsang   @relation(fields: [satsangId], references: [id], onDelete: Cascade)
+
+  @@unique([satsangId, sheetOrder])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  satsangId Int?
+  actor     Actor
+  action    String
+  before    Json?
+  after     Json?
+  at        DateTime @default(now())
+
+  @@index([satsangId, at])
+}
+
+model RateLimitHit {
+  key       String
+  windowEnd DateTime
+  count     Int      @default(0)
+
+  @@id([key, windowEnd])
+}
