@@ -4,6 +4,15 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ---
 
+## 2026-11-05
+
+### Database on Supabase instead of Neon
+- **Requested:** use the existing Supabase account.
+- **Changed:** the app uses Supabase's transaction pooler; migrations use the session pooler (`DIRECT_URL`). New migration turns on row-level security on every table so Supabase's automatic Data API can't read or change anything; the app is unaffected.
+- **Files:** `prisma.config.ts`, `.env.example`, `prisma/migrations/…_enable_row_level_security`, `README.md` (deploy steps), `design.md` §1, §2, §10a, §11, §13; `Satsang-Portal-Spec.md` (stack, decisions log).
+
+---
+
 ## 2026-11-04
 
 ### Opening Prayer and Pledge share a backup

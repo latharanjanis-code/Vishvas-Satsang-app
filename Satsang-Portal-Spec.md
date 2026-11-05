@@ -230,7 +230,7 @@ Backup cells are merged across the rows each backup covers, as in the sample she
 | Layer | Choice | Why |
 | --- | --- | --- |
 | App | Next.js (TypeScript), one project for bhakta pages, admin pages and API | Most AI coding tools know it well; one language end to end |
-| Database | PostgreSQL on Neon (free tier), accessed through Prisma | Free, managed, connects to Vercel in a few clicks |
+| Database | PostgreSQL on Supabase (free tier), accessed through Prisma | Free, managed; the coordinator already has an account (changed from Neon on Nov 5) |
 | Hosting | Vercel Hobby (free) | Push to GitHub and it deploys; HTTPS included |
 | Domain | Free \*.vercel.app address to start; a custom domain can be added later | No cost or setup at launch |
 | Spreadsheets | `exceljs` for template upload, master-list import and XLSX download | Reads and writes .xlsx in the app |
@@ -277,7 +277,7 @@ Backup cells are merged across the rows each backup covers, as in the sample she
 - [x] Changes after voting closes — bhaktas can change their vote only while voting is open; after close, no changes are needed because the named backup covers any absence (decided Oct 26)
 - [x] Slokam lists — each template carries its own slokam list; templates are independent of each other (decided Oct 26)
 - [x] Batch size — design for up to 500 names per batch (decided Oct 26)
-- [x] Stack and hosting — Next.js + Postgres (Neon) on Vercel's free plan, free vercel.app address to start (decided Oct 26)
+- [x] Stack and hosting — Next.js + Postgres on Vercel's free plan, free vercel.app address to start (decided Oct 26); database on Supabase instead of Neon (decided Nov 5)
 - [x] Opening Prayer, Pledge and Closing Prayer — filled top to bottom in sheet order like any other row, as in the sample sheet (decided Nov 2, replaces Oct 26 "on top of a block")
 - [x] Backups — stay as bhaktas who vote "Available + backup" and also chant; the sample sheet's separate backup roster is not used (confirmed Nov 2)
 - [x] Backup groups — rows are split evenly into one contiguous group per backup; each backup's cell is merged across their group in the download (decided Oct 26)

@@ -8,7 +8,7 @@ This document describes **how** the portal is built. The PRD remains the source 
 
 ## 1. Goals and constraints
 
-- One Next.js (TypeScript) app on Vercel Hobby, PostgreSQL on Neon free tier, Prisma ORM. Zero hosting cost.
+- One Next.js (TypeScript) app on Vercel Hobby, PostgreSQL on Supabase free tier, Prisma ORM. Zero hosting cost. (Neon was the first choice; switched to Supabase on Nov 5.)
 - Solo builder with AI coding help: prefer few moving parts, plain patterns, no extra services (no Redis, no queue, no paid cron).
 - All times are IST (Asia/Kolkata) in the UI; stored as UTC `timestamptz`.
 - Allocation must be **deterministic**: same inputs → same grid.
@@ -33,7 +33,7 @@ This document describes **how** the portal is built. The PRD remains the source 
  └──────────────────────────┬────────────────────────────────┘
                             │ Prisma (pooled connection)
                             ▼
-                    Neon PostgreSQL
+                 Supabase PostgreSQL
 ```
 
 - **Rendering:** public pages are server-rendered on each request (`dynamic = "force-dynamic"`) because their content depends on the clock (see §4). Pages are small, so this stays well under 2 s.
@@ -478,29 +478,35 @@ Responses lists are computed with one query each; ≤ 500 names needs no paginat
 - Passwords never logged; audit `before/after` never includes credentials.
 - Input validation with `zod` on every server action and upload.
 
+## 10a. Supabase specifics (added Nov 5)
+
+- **Connections:** the app uses `DATABASE_URL` = Supabase *Transaction pooler* (port 6543), suited to Vercel's short-lived functions. Prisma CLI (migrations, seed) uses `DIRECT_URL` = *Session pooler* (port 5432). See `prisma.config.ts`.
+- **Data API locked:** Supabase exposes tables in `public` through its Data API. Migration `enable_row_level_security` turns on row-level security with no policies on every table, so that API can read or change nothing. The app connects as the table owner and is not affected.
+- **Free-tier pause:** Supabase pauses free projects after about a week without activity. Weekly use plus the daily backstop job keep it awake.
+
 ## 11. Non-functional
 
 | Concern | Approach |
 | --- | --- |
-| Performance | Server-rendered pages with minimal JS; only the search box and admin grid are client components. Neon pooled connection string for serverless |
+| Performance | Server-rendered pages with minimal JS; only the search box and admin grid are client components. Supabase transaction pooler (port 6543) for the app; session pooler (5432) for migrations |
 | Accessibility | Semantic HTML, `<label>` for every input, radio group in `<fieldset>`, focus styles, colour contrast ≥ 4.5:1, state banner as text not colour alone |
 | Mobile | Designed at 360 px first; tap targets ≥ 44 px; base font 18 px on public pages |
 | Unicode | UTF-8 everywhere; Noto fonts for Devanagari |
-| Backups | Neon point-in-time restore (free tier window) plus a weekly admin "Export all" (master list + last allocation XLSX) as the rollback path |
+| Backups | Supabase daily backups (free tier keeps a short window) plus a weekly admin "Export all" (master list + last allocation XLSX) as the rollback path |
 | Audit retention | Cron deletes `AuditLog` rows older than 12 months |
 | Observability | Vercel logs; scheduler actions visible in the admin audit trail |
 
 ## 12. Testing
 
 - **Unit (Vitest):** `allocation.ts` — spec worked example; fewer bhaktas than blocks (wrap); more bhaktas than blocks (standby); 0 / 1 / many backups; own-block-in-own-group; rotation by `seq`; determinism (same input twice). `names.ts` — case, trim, inner spaces, NFC. `templates.ts` — the sample `A2322 Allocation.xlsx` parses into the expected kinds. `lifecycle.ts` — effective state at boundary times in IST.
-- **Integration:** server actions against a Neon branch / local Postgres: vote → overwrite → closed refusal; lazy generate called twice concurrently produces one allocation.
+- **Integration:** server actions against local Postgres: vote → overwrite → closed refusal; lazy generate called twice concurrently produces one allocation.
 - **E2E (Playwright, 360 px and desktop):** vote flow, not-on-list message, published allocation search and print page, admin login lockout.
 
 ## 13. Build plan
 
 | Milestone | Scope |
 | --- | --- |
-| M1 Foundations | Next.js + Prisma + Neon + Vercel deploy; schema & seed; admin login/session/lockout |
+| M1 Foundations | Next.js + Prisma + Supabase + Vercel deploy; schema & seed; admin login/session/lockout |
 | M2 Master list & templates | A2 incl. import; A6 upload/parse/preview; A3 schedule |
 | M3 Voting | A4, A5 (v1 buttons), B1–B6, rate limit, A7 dashboard |
 | M4 Allocation | Engine + tests, A8 picker/generate, A9 edits, A10 publish, B7 page |

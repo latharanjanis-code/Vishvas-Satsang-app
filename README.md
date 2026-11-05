@@ -41,8 +41,11 @@ both sample templates in `tests/fixtures/`, and an export round trip (allocation
 | `app/api/cron/daily` | Daily backstop job (Vercel Cron, see `vercel.json`) |
 | `prisma/` | Database schema, migrations, seed |
 
-## Deploying (not done yet)
+## Deploying (Supabase + Vercel)
 
-1. Create a free Neon Postgres database and a Vercel project linked to the GitHub repo.
-2. In Vercel set `DATABASE_URL` (Neon pooled URL), `ADMIN_USERNAME`, `ADMIN_INITIAL_PASSWORD`, `CRON_SECRET`.
-3. Run `npx prisma migrate deploy` and `npx prisma db seed` against Neon once.
+1. **Supabase:** create a project (free). From *Connect*, copy the **Transaction pooler** URL (port 6543) and the **Session pooler** URL (port 5432).
+2. **Set up the database once** from this computer: put them in `.env` as `DATABASE_URL` and `DIRECT_URL`, then run
+   `npx prisma migrate deploy` and `npx prisma db seed` (without `SEED_DEMO`). Then switch `.env` back to the local database.
+3. **Vercel:** import the GitHub repo. Add environment variables `DATABASE_URL` (transaction pooler), `ADMIN_USERNAME`,
+   `ADMIN_INITIAL_PASSWORD`, `CRON_SECRET`. Deploy. The daily backstop job is set in `vercel.json`.
+4. Sign in at `/admin`, change the password, import the master list and templates, then share the link.
