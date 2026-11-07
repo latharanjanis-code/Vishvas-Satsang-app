@@ -6,6 +6,16 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ## 2026-11-07
 
+### Real names removed before making the repository public
+- **Requested:** make the GitHub repository public, cleaning the test names first.
+- **Changed:**
+  - Test copies of the master list and both allocation sheets: every bhakta's name (171 in all, including the hidden "Trail Satsang-2" sheet of another batch and one email address) replaced with made-up names ("Test Bhakta A", "test bhakta j", "TEST BHAKTA Z"…). Lower-case/all-caps style, trailing spaces, blank rows and the sheet layout are kept, so the tests still check the same things.
+  - Author / last-edited-by names cleared from the sheets' file properties; the two devotional pictures removed from the sheets (not used by the app, and likely copyrighted).
+  - The few names quoted in `design.md` and the tests replaced.
+  - Git history rewritten so no earlier commit contains the real names either (commit ids changed; old ones purged). Verified by scanning every commit, including inside the XLSX files.
+- **Not affected:** your original files, the live Supabase data, and the app itself. All 27 tests pass.
+- **Files:** `tests/fixtures/*`, `tests/names-time-masterlist.test.ts`, `design.md`.
+
 ### Supabase settings file prepared
 - **Requested:** create `.env.supabase` with the variables to fill in for Supabase.
 - **Changed:** new local file `.env.supabase` with blanks for `DATABASE_URL`, `DIRECT_URL` and `ADMIN_INITIAL_PASSWORD`, `ADMIN_USERNAME` set to `admin`, and a random `CRON_SECRET` already filled in. Git ignores it, so it never leaves this computer.
@@ -37,7 +47,7 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ### Saved in git
 - **Requested:** publish in git and online.
-- **Changed:** git repository created on this computer; first version saved (commit `b6c4973`). `.env` (passwords) and AI-tool reference folders are excluded.
+- **Changed:** git repository created on this computer; first version saved (commit `29dc2af`). `.env` (passwords) and AI-tool reference folders are excluded.
 
 ### Test week reopened for voting (local demo only)
 - **Requested:** show the page where bhaktas vote.
