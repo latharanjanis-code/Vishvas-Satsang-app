@@ -4,6 +4,20 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ---
 
+## 2026-11-07
+
+### Supabase settings file prepared
+- **Requested:** create `.env.supabase` with the variables to fill in for Supabase.
+- **Changed:** new local file `.env.supabase` with blanks for `DATABASE_URL`, `DIRECT_URL` and `ADMIN_INITIAL_PASSWORD`, `ADMIN_USERNAME` set to `admin`, and a random `CRON_SECRET` already filled in. Git ignores it, so it never leaves this computer.
+- **Files:** `.env.supabase` (not in git).
+
+### Tables created in Supabase
+- **Requested:** set up the Supabase database.
+- **Changed:** all 3 migrations applied to the Supabase project (Mumbai region). Checked: the app's connection (transaction pooler) works, and all 14 tables have row-level security on. Local `.env` untouched.
+- **Then:** starting data added to Supabase (no demo data): admin account `admin` (must change password at first sign-in), the A2322 batch, and the weekly schedule (Sat 7 pm; voting Mon 6 am – Tue 11:59 pm; publish Wed 6 am IST). Master list and templates are still empty and are imported from the admin pages.
+
+---
+
 ## 2026-11-05
 
 ### Database on Supabase instead of Neon
