@@ -6,6 +6,10 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ## 2026-11-07
 
+### Live on Vercel
+- **Requested:** deploy online.
+- **Changed:** deployed by the user at https://vishvas-satsang-app.vercel.app. Checked: voting page and allocation page load and read from Supabase (batch name shows), `/admin` sends you to sign-in, the daily job refuses calls without the secret, and server code runs in Mumbai (`bom1`). No code changed.
+
 ### Code published on GitHub; Vercel steps corrected
 - **Requested:** publish to GitHub (done by the user with GitHub Desktop, as a public repository: `latharanjanis-code/Vishvas-Satsang-app`).
 - **Changed:** README deploy steps: Vercel only needs `DATABASE_URL` and `CRON_SECRET` (the admin account already exists in Supabase); set the function region to Mumbai so the app sits next to the database.
