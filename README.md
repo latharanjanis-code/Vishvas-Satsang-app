@@ -46,6 +46,7 @@ both sample templates in `tests/fixtures/`, and an export round trip (allocation
 1. **Supabase:** create a project (free). From *Connect*, copy the **Transaction pooler** URL (port 6543) and the **Session pooler** URL (port 5432).
 2. **Set up the database once** from this computer: put them in `.env` as `DATABASE_URL` and `DIRECT_URL`, then run
    `npx prisma migrate deploy` and `npx prisma db seed` (without `SEED_DEMO`). Then switch `.env` back to the local database.
-3. **Vercel:** import the GitHub repo. Add environment variables `DATABASE_URL` (transaction pooler), `ADMIN_USERNAME`,
-   `ADMIN_INITIAL_PASSWORD`, `CRON_SECRET`. Deploy. The daily backstop job is set in `vercel.json`.
+3. **Vercel:** import the GitHub repo. Add environment variables `DATABASE_URL` (transaction pooler) and `CRON_SECRET`
+   (the admin account was already created by the seed, so the admin variables aren't needed here). Deploy, then set
+   *Settings → Functions → Function Region* to Mumbai (`bom1`) and redeploy. The daily backstop job is set in `vercel.json`.
 4. Sign in at `/admin`, change the password, import the master list and templates, then share the link.

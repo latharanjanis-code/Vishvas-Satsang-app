@@ -6,6 +6,11 @@ Every change requested for the Satsang Portal, newest first. Each entry says wha
 
 ## 2026-11-07
 
+### Code published on GitHub; Vercel steps corrected
+- **Requested:** publish to GitHub (done by the user with GitHub Desktop, as a public repository: `latharanjanis-code/Vishvas-Satsang-app`).
+- **Changed:** README deploy steps: Vercel only needs `DATABASE_URL` and `CRON_SECRET` (the admin account already exists in Supabase); set the function region to Mumbai so the app sits next to the database.
+- **Files:** `README.md`.
+
 ### Real names removed before making the repository public
 - **Requested:** make the GitHub repository public, cleaning the test names first.
 - **Changed:**
